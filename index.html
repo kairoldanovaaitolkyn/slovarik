@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Английский словарик</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=Rubik:wght@500;700;800&display=swap">
+<style>
+/* Layout: grid-paper notebook. Header + word-list chips + tabs on top, one game panel below. Sticker-style buttons carry the boldness; everything else stays quiet. */
+:root {
+  --bg: #EEF3FB;
+  --grid: #D9E3F4;
+  --paper: #FFFFFF;
+  --ink: #1B2340;
+  --muted: #55607F;
+  --edge: #C3CFE8;
+  --shadow: #1B2340;
+  --blue: #2F5BEA;
+  --on-blue: #FFFFFF;
+  --blue-soft: #DCE6FF;
+  --yellow: #FFC933;
+  --on-yellow: #1B2340;
+  --yellow-soft: #FFF0BF;
+  --coral: #FF6B57;
+  --on-coral: #1B2340;
+  --coral-soft: #FFDAD4;
+  --mint: #22B58A;
+  --on-mint: #10261F;
+  --mint-soft: #CFF3E6;
+  --display: 'Rubik', system-ui, 'Segoe UI', Arial, sans-serif;
+  --body: 'Nunito', system-ui, 'Segoe UI', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121830; --grid: #1B2548; --paper: #1B2342; --ink: #EEF1FF; --muted: #A9B2D1;
+    --edge: #34406B; --shadow: #05081A;
+    --blue: #7A9BFF; --on-blue: #0F1630; --blue-soft: #263564;
+    --yellow: #FFD24D; --on-yellow: #1B2340; --yellow-soft: #4A3F17;
+    --coral: #FF8A78; --on-coral: #1B2340; --coral-soft: #55302E;
+    --mint: #4AD3A8; --on-mint: #0B2620; --mint-soft: #174239;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121830; --grid: #1B2548; --paper: #1B2342; --ink: #EEF1FF; --muted: #A9B2D1;
+  --edge: #34406B; --shadow: #05081A;
+  --blue: #7A9BFF; --on-blue: #0F1630; --blue-soft: #263564;
+  --yellow: #FFD24D; --on-yellow: #1B2340; --yellow-soft: #4A3F17;
+  --coral: #FF8A78; --on-coral: #1B2340; --coral-soft: #55302E;
+  --mint: #4AD3A8; --on-mint: #0B2620; --mint-soft: #174239;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  padding-block: 20px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 880px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+p { margin: 0; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* header */
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.brand { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.brand h1 { font-size: clamp(1.8rem, 6.5vw, 2.8rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.01em; }
+.mark { background: linear-gradient(transparent 58%, var(--yellow) 58%); padding: 0 .1em; }
+.brand p { color: var(--muted); font-weight: 700; }
+.stars {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--yellow); color: var(--on-yellow);
+  border: 2.5px solid var(--ink); border-radius: 99px;
+  box-shadow: 0 4px 0 var(--shadow);
+  padding: 6px 16px 6px 12px;
+  font: 800 1.25rem var(--display);
+  font-variant-numeric: tabular-nums;
+}
+.stars svg { width: 24px; height: 24px; }
+.stars.bump { animation: bump .5s ease; }
+@keyframes bump { 40% { transform: scale(1.18) rotate(-4deg); } }
+
+/* buttons */
+button { font: inherit; color: inherit; }
+.btn, .chip, .tab, .seg {
+  font-family: var(--display); font-weight: 700;
+  border: 2.5px solid var(--ink); border-radius: 14px;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0 4px 0 var(--shadow);
+  cursor: pointer; min-height: 44px;
+  transition: transform .08s ease, box-shadow .08s ease;
+}
+.btn:hover, .chip:hover, .tab:hover, .seg:hover { transform: translateY(-1px); }
+.btn:active, .chip:active, .tab:active, .seg:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow); }
+button:focus-visible, input:focus-visible, .fc:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.btn { padding: 8px 18px; font-size: 1rem; }
+.btn.blue { background: var(--blue); color: var(--on-blue); }
+.btn.mint { background: var(--mint); color: var(--on-mint); }
+.btn.coral { background: var(--coral); color: var(--on-coral); }
+.btn.yellow { background: var(--yellow); color: var(--on-yellow); }
+.btn[disabled] { opacity: .5; cursor: default; transform: none; box-shadow: 0 4px 0 var(--shadow); }
+
+.units, .tabs, .modes { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { padding: 6px 14px; font-size: .95rem; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; }
+.chip .n { font: 700 .8rem var(--body); background: var(--blue-soft); color: var(--ink); border-radius: 99px; padding: 1px 8px; }
+.chip[aria-pressed="true"] { background: var(--blue); color: var(--on-blue); }
+.chip[aria-pressed="true"] .n { background: var(--on-blue); color: var(--blue); }
+.tab { padding: 8px 16px; font-size: 1rem; }
+.tab[aria-selected="true"] { background: var(--yellow); color: var(--on-yellow); }
+.seg { padding: 6px 14px; font-size: .92rem; min-height: 40px; }
+.seg[aria-pressed="true"] { background: var(--coral); color: var(--on-coral); }
+
+/* panels */
+.panel { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--shadow); padding: 18px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.lead { color: var(--muted); font-weight: 700; }
+.search { width: 100%; font: 700 1rem var(--body); color: var(--ink); background: var(--bg); border: 2.5px solid var(--ink); border-radius: 14px; padding: 10px 14px; min-height: 46px; }
+.search::placeholder { color: var(--muted); }
+.group h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 10px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.group h2 small { font: 700 .85rem var(--body); color: var(--muted); }
+.list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 10px; }
+.group + .group { margin-top: 10px; }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--bg); border: 2px solid var(--edge); border-radius: 14px; min-width: 0; }
+.spk { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--blue); color: var(--on-blue); cursor: pointer; display: grid; place-items: center; box-shadow: 0 3px 0 var(--shadow); transition: transform .08s ease, box-shadow .08s ease; }
+.spk:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--shadow); }
+.spk svg { width: 22px; height: 22px; }
+.txt { flex: 1; min-width: 0; cursor: pointer; }
+.en { font: 800 1.2rem/1.2 var(--display); overflow-wrap: anywhere; }
+.ru { color: var(--muted); font-weight: 700; overflow-wrap: anywhere; }
+.slow { flex: none; background: none; border: 2px solid var(--edge); border-radius: 99px; padding: 4px 10px; font: 700 .8rem var(--body); color: var(--muted); cursor: pointer; min-height: 32px; }
+.slow:hover { border-color: var(--ink); color: var(--ink); }
+.empty { text-align: center; color: var(--muted); font-weight: 700; padding: 24px 0; }
+.live { font: 700 .8rem var(--body); color: var(--blue); text-decoration: underline; }
+
+/* progress */
+.bar { height: 16px; border: 2.5px solid var(--ink); border-radius: 99px; background: var(--bg); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--mint); transition: width .3s ease; }
+.meta { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-weight: 800; color: var(--muted); }
+
+/* flashcards */
+.fc-scene { perspective: 1000px; width: 100%; max-width: 520px; height: 250px; margin: 0 auto; }
+.fc { position: relative; display: block; width: 100%; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; transition: transform .5s ease; }
+.fc.flipped { transform: rotateY(180deg); }
+.face { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; text-align: center; border: 2.5px solid var(--ink); border-radius: 20px; box-shadow: 0 6px 0 var(--shadow); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.face.front { background: var(--blue-soft); }
+.face.back { background: var(--yellow-soft); transform: rotateY(180deg); }
+.face .big { font: 800 clamp(1.9rem, 8vw, 3rem)/1.1 var(--display); overflow-wrap: anywhere; }
+.face .big.ruw { font-size: clamp(1.5rem, 6vw, 2.3rem); }
+.face .hint { font: 700 .85rem var(--body); color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+/* memory */
+.mem-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.mem { height: 96px; padding: 6px; display: grid; place-items: center; text-align: center; font: 700 1rem/1.15 var(--display); overflow: hidden; overflow-wrap: anywhere; cursor: pointer; border: 2.5px solid var(--ink); border-radius: 14px; background: var(--blue); color: var(--on-blue); box-shadow: 0 4px 0 var(--shadow); transition: transform .08s ease; }
+.mem.closed { font-size: 1.8rem; font-weight: 800; }
+.mem.open { background: var(--paper); color: var(--ink); }
+.mem.small { font-size: .85rem; }
+.mem.matched { background: var(--mint-soft); color: var(--ink); border-color: var(--mint); box-shadow: 0 4px 0 var(--mint); cursor: default; }
+.result { text-align: center; display: flex; flex-direction: column; gap: 12px; align-items: center; padding: 8px 0; }
+.result h2 { font-size: 1.6rem; font-weight: 800; }
+.result .st { display: flex; gap: 6px; color: var(--yellow); }
+.result .st svg { width: 38px; height: 38px; stroke: var(--ink); stroke-width: 1.5; }
+.result .st .off { color: var(--grid); }
+
+/* quiz */
+.q-big { font: 800 clamp(1.8rem, 7vw, 2.6rem)/1.15 var(--display); overflow-wrap: anywhere; text-align: center; }
+.q-box { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 10px; background: var(--blue-soft); border: 2.5px solid var(--ink); border-radius: 16px; }
+.q-sub { color: var(--muted); font-weight: 700; text-align: center; }
+.bigspk { width: 76px; height: 76px; border-radius: 50%; border: 2.5px solid var(--ink); background: var(--blue); color: var(--on-blue); display: grid; place-items: center; cursor: pointer; box-shadow: 0 5px 0 var(--shadow); }
+.bigspk svg { width: 38px; height: 38px; }
+.bigspk:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--shadow); }
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.opt { text-align: left; padding: 12px 14px; font: 700 1.05rem/1.25 var(--display); border: 2.5px solid var(--ink); border-radius: 14px; background: var(--paper); color: var(--ink); box-shadow: 0 4px 0 var(--shadow); cursor: pointer; overflow-wrap: anywhere; min-height: 56px; }
+.opt:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow); }
+.opt.good { background: var(--mint); color: var(--on-mint); }
+.opt.bad { background: var(--coral); color: var(--on-coral); }
+.opt.dim { opacity: .55; }
+.fb { min-height: 1.6em; font: 800 1.1rem var(--display); text-align: center; }
+.fb.good { color: var(--mint); }
+.fb.bad { color: var(--coral); }
+
+/* build the word */
+.slots, .tiles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.slot { width: 44px; height: 54px; border: 2.5px dashed var(--edge); border-radius: 12px; background: var(--bg); display: grid; place-items: center; font: 800 1.5rem var(--display); text-transform: uppercase; padding: 0; color: var(--ink); cursor: default; }
+.slot.filled { border-style: solid; border-color: var(--ink); background: var(--paper); cursor: pointer; box-shadow: 0 3px 0 var(--shadow); }
+.slot.ok { background: var(--mint); color: var(--on-mint); border-color: var(--ink); }
+.slots.shake { animation: shake .4s ease; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.tile { width: 48px; height: 56px; border: 2.5px solid var(--ink); border-radius: 12px; background: var(--yellow); color: var(--on-yellow); font: 800 1.5rem var(--display); text-transform: uppercase; box-shadow: 0 4px 0 var(--shadow); cursor: pointer; padding: 0; }
+.tile:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--shadow); }
+.tile.used { visibility: hidden; }
+
+.toast { position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: var(--ink); color: var(--bg); font-weight: 800; padding: 10px 18px; border-radius: 99px; max-width: calc(100vw - 32px); text-align: center; transition: opacity .2s ease, transform .2s ease; z-index: 10; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 640px) {
+  .mem-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .panel { padding: 24px; }
+}
+@media (max-width: 460px) {
+  .opts { grid-template-columns: minmax(0, 1fr); }
+  .fc-scene { height: 220px; }
+  .tab { padding: 8px 12px; font-size: .95rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<style>[hidden]{display:none!important}body{margin:0}</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Английский <span class="mark">словарик</span></h1>
+      <p>Нажми на слово, чтобы услышать его. Играй и запоминай.</p>
+    </div>
+    <div class="stars" id="stars" role="status" aria-label="Твои звёзды">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9 22,9.5 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.5 9,9" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      <span id="starCount">0</span>
+    </div>
+  </header>
+
+  <div class="units" id="units" role="group" aria-label="Выбери список слов"></div>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Что делаем"></nav>
+
+  <main>
+    <section class="panel" id="p-dict" role="tabpanel" aria-labelledby="t-dict">
+      <p class="lead">Нажми на значок звука или на слово. Кнопка «медленно» читает слово не спеша. Хочешь услышать диктора? Нажми «живая запись».</p>
+      <label class="vh" for="search">Поиск слова</label>
+      <input class="search" id="search" type="search" placeholder="Найти слово" autocomplete="off">
+      <div id="dictList"></div>
+    </section>
+
+    <section class="panel" id="p-cards" role="tabpanel" aria-labelledby="t-cards" hidden>
+      <p class="lead">Нажми на карточку, чтобы увидеть перевод. Знаешь слово? Жми «Знаю». Не знаешь? Жми «Ещё раз», карточка вернётся в конец.</p>
+      <div id="cardsBox"></div>
+    </section>
+
+    <section class="panel" id="p-pairs" role="tabpanel" aria-labelledby="t-pairs" hidden>
+      <p class="lead">Открывай по две карточки. Найди английское слово и его перевод.</p>
+      <div id="pairsBox"></div>
+    </section>
+
+    <section class="panel" id="p-quiz" role="tabpanel" aria-labelledby="t-quiz" hidden>
+      <div class="modes" id="quizModes" role="group" aria-label="Режим викторины"></div>
+      <div id="quizBox"></div>
+    </section>
+
+    <section class="panel" id="p-build" role="tabpanel" aria-labelledby="t-build" hidden>
+      <p class="lead">Нажимай на буквы, чтобы собрать слово. Нажми на букву в ответе, чтобы убрать её.</p>
+      <div id="buildBox"></div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var ICON_SPK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  var ICON_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 15,9 22,9.5 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9.5 9,9" fill="currentColor" stroke-linejoin="round"/></svg>';
+
+  function $(id) { return document.getElementById(id); }
+  function h(tag, props, kids) {
+    var e = document.createElement(tag);
+    if (props) {
+      for (var k in props) {
+        var v = props[k];
+        if (k === 'class') e.className = v;
+        else if (k === 'text') e.textContent = v;
+        else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), v);
+        else if (v === true) e.setAttribute(k, '');
+        else if (v !== false && v != null) e.setAttribute(k, v);
+      }
+    }
+    (kids || []).forEach(function (c) {
+      if (c == null) return;
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return e;
+  }
+  function icon(cls, svg) { var s = h('span', { class: cls }); s.innerHTML = svg; return s; }
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function plural(n, f) {
+    var m = n % 10, c = n % 100;
+    return n + ' ' + (m === 1 && c !== 11 ? f[0] : (m >= 2 && m <= 4 && (c < 12 || c > 14) ? f[1] : f[2]));
+  }
+
+  /* ---------- data ---------- */
+  var RAW = {
+    u1: [
+      ['Review', 'повторение'], ['Revision', 'повторение к тесту'], ['Following', 'следующий'],
+      ['Word', 'слово'], ['Words', 'слова'], ['To mean', 'означать'], ['Meaning', 'значение'],
+      ['Hour', 'час'], ['Sometimes', 'иногда'], ['Experience', 'опыт'], ['Earth', 'Земля'],
+      ['Live', 'жить'], ['Light', 'свет'], ['Below', 'ниже'], ['Travel', 'путешествовать'],
+      ['Around the world', 'по всему миру'], ['Visit', 'посещать'], ['Exciting', 'захватывающий'],
+      ['Activity', 'занятие'], ['Turn on', 'включать'], ['Turn off', 'выключать'],
+      ['Here', 'здесь'], ['There', 'там'], ['Neck', 'шея'], ['Naughty', 'непослушный'],
+      ['Countryside', 'сельская местность'], ['Choose', 'выбирать'], ['Option', 'вариант'],
+      ['Far', 'далеко'], ['Back', 'назад, спина'], ['Cross out', 'вычеркнуть'], ['Mistakes', 'ошибки'],
+      ['Some', 'несколько'], ['Tick', 'галочка'], ['Present simple', 'настоящее простое время'],
+      ['On time', 'вовремя'], ['Lesson', 'урок']
+    ],
+    u3: [
+      ['Late', 'поздно'], ['To meet', 'встречать, знакомиться'], ['Meeting', 'встреча'],
+      ['Order', 'заказ'], ['To form', 'составлять'], ['Circle', 'круг'],
+      ['Be (am/is/are) afraid of', 'бояться', 'be afraid of'], ['Dangerous', 'опасный'],
+      ['Join', 'присоединяться'], ['Party', 'вечеринка'], ['Tiring', 'утомительный'],
+      ['Also', 'также'], ['Delicious', 'вкусный'], ['Later', 'позже'], ['Outdoor', 'на улице'],
+      ['Until', 'до'], ['Get dark', 'темнеть'], ['Carefully', 'осторожно'],
+      ['Time to go', 'пора идти'], ['Excited', 'в восторге'], ['Hear', 'слышать'],
+      ['Underline', 'подчёркивать'], ['Evidence, proof', 'доказательство'], ['Alone', 'один'],
+      ['Too', 'тоже'], ['At night', 'ночью'], ['Else', 'ещё'], ['In the evening', 'вечером']
+    ],
+    v: [
+      ['See – saw', 'видеть – видел', 'see, saw', 'saw', 'видел'],
+      ['Go – went', 'идти, ходить – шёл, ходил', 'go, went', 'went', 'шёл, ходил'],
+      ['Feel – felt', 'чувствовать – чувствовал', 'feel, felt', 'felt', 'чувствовал'],
+      ['Get – got (somewhere)', 'добираться – добрался (куда-либо)', 'get, got', 'got', 'добрался'],
+      ['Decide – decided', 'решать – решил', 'decide, decided', 'decided', 'решил'],
+      ['Tell – told', 'рассказывать, говорить – рассказал, сказал', 'tell, told', 'told', 'рассказал, сказал']
+    ]
+  };
+  var UNITS = [
+    { id: 'all', name: 'Все слова' }, { id: 'u1', name: 'Список 1' },
+    { id: 'u3', name: 'Список 2' }, { id: 'v', name: 'Глаголы' }
+  ];
+  var UNIT_TITLE = { u1: 'Список 1', u3: 'Список 2', v: 'Глаголы: сейчас и в прошлом' };
+  var ALL = [];
+  Object.keys(RAW).forEach(function (u) {
+    RAW[u].forEach(function (r, i) {
+      var verb = u === 'v';
+      var w = { id: u + i, unit: u, en: r[0], ru: r[1], say: r[2] || r[0], verb: verb, target: null, prompt: '', sub: '' };
+      if (verb) {
+        w.target = r[3]; w.prompt = r[4];
+        w.sub = 'Прошедшая форма от «' + r[0].split(/\s+[–-]\s+/)[0].toLowerCase() + '»';
+      } else if (/^[A-Za-z]{3,12}$/.test(r[0])) {
+        w.target = r[0]; w.prompt = r[1]; w.sub = 'Составь слово по-английски';
+      }
+      ALL.push(w);
+    });
+  });
+  var unit = 'all';
+  function pool() { return unit === 'all' ? ALL : ALL.filter(function (w) { return w.unit === unit; }); }
+
+  /* ---------- stars and toast ---------- */
+  var stars = 0;
+  try { stars = parseInt(localStorage.getItem('slovarik-stars') || '0', 10) || 0; } catch (e) {}
+  $('starCount').textContent = stars;
+  function addStars(n) {
+    stars += n;
+    $('starCount').textContent = stars;
+    try { localStorage.setItem('slovarik-stars', String(stars)); } catch (e) {}
+    var b = $('stars'); b.classList.remove('bump'); void b.offsetWidth; b.classList.add('bump');
+  }
+  var toastTimer;
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.classList.remove('on'); }, 2600);
+  }
+
+  /* ---------- speech ---------- */
+  var voice = null;
+  var canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+  function voiceScore(v) {
+    var s = 0;
+    if (/^en[-_]US/i.test(v.lang)) s += 2; else if (/^en[-_]GB/i.test(v.lang)) s += 1;
+    if (/natural|neural|online/i.test(v.name)) s += 6;
+    if (/google/i.test(v.name)) s += 4;
+    if (/samantha|ava|allison|aria|jenny|zira|karen|daniel|serena/i.test(v.name)) s += 3;
+    if (/espeak|compact/i.test(v.name)) s -= 5;
+    return s;
+  }
+  function pickVoice() {
+    if (!canSpeak) return;
+    var us = speechSynthesis.getVoices().filter(function (v) { return /^en[-_]US/i.test(v.lang); });
+    voice = us.filter(function (v) { return /samantha/i.test(v.name); })[0] ||
+            us.sort(function (a, b) { return voiceScore(b) - voiceScore(a); })[0] || null;
+  }
+  if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+  function speak(text, rate) {
+    if (!canSpeak) { toast('В этом браузере нет озвучки слов'); return; }
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US'; if (voice) u.voice = voice;
+      u.rate = rate || 0.85;
+      u.onerror = function (ev) { if (ev && ev.error && ev.error !== 'canceled' && ev.error !== 'interrupted') toast('Не получилось озвучить слово'); };
+      speechSynthesis.speak(u);
+    } catch (e) { toast('Не получилось озвучить слово'); }
+  }
+
+  /* ---------- tabs and units ---------- */
+  var TABS = [['dict', 'Словарь'], ['cards', 'Карточки'], ['pairs', 'Найди пару'], ['quiz', 'Викторина'], ['build', 'Собери слово']];
+  var current = 'dict';
+  var dirty = { dict: true, cards: true, pairs: true, quiz: true, build: true };
+  var INIT = { dict: renderDict, cards: initCards, pairs: initPairs, quiz: initQuiz, build: initBuild };
+
+  function renderTabs() {
+    var nav = $('tabs'); nav.textContent = '';
+    TABS.forEach(function (t) {
+      nav.appendChild(h('button', {
+        class: 'tab', type: 'button', role: 'tab', id: 't-' + t[0],
+        'aria-selected': String(current === t[0]), 'aria-controls': 'p-' + t[0],
+        onclick: function () { showTab(t[0]); }
+      }, [t[1]]));
+    });
+  }
+  function showTab(id) {
+    current = id;
+    renderTabs();
+    TABS.forEach(function (t) { $('p-' + t[0]).hidden = t[0] !== id; });
+    if (dirty[id]) { dirty[id] = false; INIT[id](); }
+  }
+  function renderUnits() {
+    var box = $('units'); box.textContent = '';
+    UNITS.forEach(function (u) {
+      var n = u.id === 'all' ? ALL.length : ALL.filter(function (w) { return w.unit === u.id; }).length;
+      box.appendChild(h('button', {
+        class: 'chip', type: 'button', 'aria-pressed': String(unit === u.id),
+        onclick: function () { setUnit(u.id); }
+      }, [u.name, h('span', { class: 'n', text: String(n) })]));
+    });
+  }
+  function setUnit(id) {
+    unit = id;
+    Object.keys(dirty).forEach(function (k) { dirty[k] = true; });
+    renderUnits();
+    showTab(current);
+  }
+
+  /* ---------- dictionary ---------- */
+  function row(w) {
+    var spk = h('button', { class: 'spk', type: 'button', 'aria-label': 'Послушать: ' + w.en, onclick: function () { speak(w.say, 0.85); } });
+    spk.innerHTML = ICON_SPK;
+    var live = h('a', { class: 'live', href: 'https://dictionary.cambridge.org/search/english/direct/?q=' + encodeURIComponent(w.say.split(',')[0]), target: '_blank', rel: 'noopener', text: 'живая запись' });
+    live.addEventListener('click', function (ev) { ev.stopPropagation(); });
+    var txt = h('div', { class: 'txt', onclick: function () { speak(w.say, 0.85); } }, [
+      h('div', { class: 'en', text: w.en }), h('div', { class: 'ru', text: w.ru }), live
+    ]);
+    var slow = h('button', { class: 'slow', type: 'button', 'aria-label': 'Послушать медленно: ' + w.en, onclick: function () { speak(w.say, 0.5); } }, ['медленно']);
+    return h('div', { class: 'row' }, [spk, txt, slow]);
+  }
+  function renderDict() {
+    var box = $('dictList'); box.textContent = '';
+    var q = $('search').value.trim().toLowerCase();
+    var list = pool().filter(function (w) { return !q || w.en.toLowerCase().indexOf(q) > -1 || w.ru.toLowerCase().indexOf(q) > -1; });
+    if (!list.length) { box.appendChild(h('p', { class: 'empty', text: 'Ничего не нашлось. Попробуй другое слово.' })); return; }
+    var order = ['u1', 'u3', 'v'];
+    order.forEach(function (u) {
+      var items = list.filter(function (w) { return w.unit === u; });
+      if (!items.length) return;
+      var g = h('div', { class: 'group' }, [
+        h('h2', null, [UNIT_TITLE[u], h('small', { text: plural(items.length, ['слово', 'слова', 'слов']) })]),
+        h('div', { class: 'list' }, items.map(row))
+      ]);
+      box.appendChild(g);
+    });
+  }
+  $('search').addEventListener('input', renderDict);
+
+  /* ---------- flashcards ---------- */
+  var fc = { queue: [], total: 0, known: 0 };
+  function initCards() {
+    fc.queue = shuffle(pool()); fc.total = fc.queue.length; fc.known = 0;
+    renderCards(false);
+  }
+  function renderCards(autoplay) {
+    var box = $('cardsBox'); box.textContent = '';
+    var pct = fc.total ? Math.round(fc.known / fc.total * 100) : 0;
+    var meta = h('div', { class: 'meta' }, [h('span', { text: 'Выучено: ' + fc.known + ' из ' + fc.total }), h('span', { text: 'Осталось: ' + fc.queue.length })]);
+    var bar = h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct) }, [h('i', { style: 'width:' + pct + '%' })]);
+    if (!fc.queue.length) {
+      var st = h('div', { class: 'result' }, [
+        h('h2', { text: 'Ты выучил все слова!' }),
+        h('p', { class: 'lead', text: 'Хочешь повторить ещё раз?' }),
+        h('button', { class: 'btn blue', type: 'button', onclick: initCards }, ['Начать сначала'])
+      ]);
+      box.appendChild(h('div', { style: 'display:flex;flex-direction:column;gap:16px' }, [meta, bar, st]));
+      return;
+    }
+    var w = fc.queue[0];
+    var card = h('button', { class: 'fc', type: 'button', 'aria-label': 'Карточка. Слово: ' + w.en + '. Нажми, чтобы увидеть перевод.' }, [
+      h('div', { class: 'face front' }, [h('div', { class: 'big', text: w.en }), h('div', { class: 'hint', text: 'нажми, чтобы перевернуть' })]),
+      h('div', { class: 'face back' }, [h('div', { class: 'big ruw', text: w.ru }), h('div', { class: 'hint', text: w.en })])
+    ]);
+    card.addEventListener('click', function () {
+      var f = card.classList.toggle('flipped');
+      card.setAttribute('aria-label', f ? 'Перевод: ' + w.ru + '. Нажми, чтобы вернуться к слову.' : 'Карточка. Слово: ' + w.en + '. Нажми, чтобы увидеть перевод.');
+    });
+    var listen = h('button', { class: 'btn blue', type: 'button', onclick: function () { speak(w.say, 0.85); } }, ['Послушать']);
+    var again = h('button', { class: 'btn coral', type: 'button', onclick: function () { fc.queue.push(fc.queue.shift()); renderCards(true); } }, ['Ещё раз']);
+    var know = h('button', { class: 'btn mint', type: 'button', onclick: function () { fc.queue.shift(); fc.known++; addStars(1); renderCards(true); } }, ['Знаю']);
+    box.appendChild(h('div', { style: 'display:flex;flex-direction:column;gap:18px' }, [
+      meta, bar, h('div', { class: 'fc-scene' }, [card]), h('div', { class: 'actions' }, [listen, again, know])
+    ]));
+    if (autoplay) speak(w.say, 0.85);
+  }
+
+  /* ---------- memory pairs ---------- */
+  var mg = null;
+  function initPairs() {
+    var cand = pool().filter(function (w) { return w.en.length <= 22; });
+    if (cand.length < 2) cand = pool();
+    var picks = shuffle(cand).slice(0, 6), cards = [];
+    picks.forEach(function (w) {
+      cards.push({ pid: w.id, lang: 'en', text: w.en, w: w, open: false, matched: false });
+      cards.push({ pid: w.id, lang: 'ru', text: w.ru, w: w, open: false, matched: false });
+    });
+    mg = { cards: shuffle(cards), open: [], moves: 0, matched: 0, lock: false, n: picks.length };
+    renderPairs();
+  }
+  function paintPair(c) {
+    var show = c.open || c.matched;
+    c.el.className = 'mem ' + (c.matched ? 'matched' : (c.open ? 'open' : 'closed')) + (show && c.text.length > 16 ? ' small' : '');
+    c.el.textContent = show ? c.text : '?';
+    c.el.setAttribute('aria-label', show ? c.text : 'Закрытая карточка');
+  }
+  function renderPairs() {
+    var box = $('pairsBox'); box.textContent = '';
+    var status = h('div', { class: 'meta' }, [h('span', { id: 'pairsMoves', text: 'Ходов: 0' }), h('span', { id: 'pairsFound', text: 'Найдено пар: 0 из ' + mg.n })]);
+    var grid = h('div', { class: 'mem-grid' });
+    mg.cards.forEach(function (c) {
+      c.el = h('button', { type: 'button' });
+      c.el.addEventListener('click', function () { flipPair(c); });
+      paintPair(c); grid.appendChild(c.el);
+    });
+    var msg = h('div', { id: 'pairsMsg' });
+    box.appendChild(h('div', { style: 'display:flex;flex-direction:column;gap:16px' }, [status, grid, msg]));
+  }
+  function flipPair(c) {
+    if (mg.lock || c.open || c.matched) return;
+    c.open = true; paintPair(c);
+    if (c.lang === 'en') speak(c.w.say, 0.85);
+    mg.open.push(c);
+    if (mg.open.length < 2) return;
+    mg.moves++; $('pairsMoves').textContent = 'Ходов: ' + mg.moves;
+    var a = mg.open[0], b = mg.open[1];
+    if (a.pid === b.pid) {
+      a.matched = b.matched = true; paintPair(a); paintPair(b);
+      mg.matched++; mg.open = [];
+      $('pairsFound').textContent = 'Найдено пар: ' + mg.matched + ' из ' + mg.n;
+      speak(a.w.say, 0.85);
+      if (mg.matched === mg.n) winPairs();
+    } else {
+      mg.lock = true;
+      setTimeout(function () { a.open = b.open = false; paintPair(a); paintPair(b); mg.open = []; mg.lock = false; }, 1000);
+    }
+  }
+  function starRow(n, total) {
+    var r = h('div', { class: 'st' });
+    for (var i = 0; i < total; i++) r.appendChild(icon(i < n ? '' : 'off', ICON_STAR));
+    return r;
+  }
+  function winPairs() {
+    var n = mg.n, s = mg.moves <= n + 3 ? 3 : (mg.moves <= n * 2 ? 2 : 1);
+    addStars(s + 2);
+    var m = $('pairsMsg'); m.textContent = '';
+    m.appendChild(h('div', { class: 'result' }, [
+      starRow(s, 3), h('h2', { text: 'Молодец! Все пары найдены' }),
+      h('p', { class: 'lead', text: 'Ходов: ' + mg.moves }),
+      h('button', { class: 'btn blue', type: 'button', onclick: initPairs }, ['Играть ещё'])
+    ]));
+  }
+
+  /* ---------- quiz ---------- */
+  var qz = { mode: 'enru', round: [], i: 0, score: 0, streak: 0, answered: false };
+  function textOf(w, mode) { return mode === 'ruen' ? w.en : w.ru; }
+  function keyOf(t) { return t.toLowerCase().split(/[\s,(–-]+/)[0]; }
+  function distractors(w, mode) {
+    var out = [], seen = {}, key = keyOf(textOf(w, mode));
+    seen[textOf(w, mode)] = 1;
+    function take(list) {
+      shuffle(list).forEach(function (d) {
+        if (out.length >= 3) return;
+        var t = textOf(d, mode);
+        if (d.id === w.id || seen[t] || keyOf(t) === key) return;
+        seen[t] = 1; out.push(d);
+      });
+    }
+    var same = function (d) { return d.verb === w.verb; };
+    take(pool().filter(same)); take(ALL.filter(same)); take(ALL);
+    return out;
+  }
+  function initQuiz() {
+    qz.round = shuffle(pool()).slice(0, 10);
+    qz.i = 0; qz.score = 0; qz.streak = 0; qz.answered = false;
+    renderModes(); renderQ();
+  }
+  function renderModes() {
+    var box = $('quizModes'); box.textContent = '';
+    [['enru', 'Что значит слово?'], ['ruen', 'Как сказать по-английски?'], ['listen', 'Послушай и выбери']].forEach(function (m) {
+      box.appendChild(h('button', { class: 'seg', type: 'button', 'aria-pressed': String(qz.mode === m[0]), onclick: function () { qz.mode = m[0]; initQuiz(); } }, [m[1]]));
+    });
+  }
+  function renderQ() {
+    var box = $('quizBox'); box.textContent = '';
+    if (qz.i >= qz.round.length) { renderQuizEnd(box); return; }
+    var w = qz.round[qz.i]; qz.answered = false;
+    var opts = shuffle([w].concat(distractors(w, qz.mode)));
+    var pct = Math.round(qz.i / qz.round.length * 100);
+    var meta = h('div', { class: 'meta' }, [h('span', { text: 'Вопрос ' + (qz.i + 1) + ' из ' + qz.round.length }), h('span', { text: 'Верно: ' + qz.score })]);
+    var bar = h('div', { class: 'bar', role: 'progressbar', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': String(pct) }, [h('i', { style: 'width:' + pct + '%' })]);
+    var prompt;
+    if (qz.mode === 'enru') {
+      var sp = h('button', { class: 'spk', type: 'button', 'aria-label': 'Послушать: ' + w.en, onclick: function () { speak(w.say, 0.85); } }); sp.innerHTML = ICON_SPK;
+      prompt = h('div', { class: 'q-box' }, [h('div', { class: 'q-big', text: w.en }), sp, h('div', { class: 'q-sub', text: 'Выбери перевод' })]);
+    } else if (qz.mode === 'ruen') {
+      prompt = h('div', { class: 'q-box' }, [h('div', { class: 'q-big', text: w.ru }), h('div', { class: 'q-sub', text: 'Выбери английское слово' })]);
+    } else {
+      var bs = h('button', { class: 'bigspk', type: 'button', 'aria-label': 'Послушать слово ещё раз', onclick: function () { speak(w.say, 0.85); } }); bs.innerHTML = ICON_SPK;
+      prompt = h('div', { class: 'q-box' }, [bs, h('div', { class: 'q-sub', text: 'Послушай и выбери перевод' })]);
+    }
+    var fb = h('div', { class: 'fb', role: 'status' });
+    var next = h('button', { class: 'btn blue', type: 'button', hidden: true, onclick: function () { qz.i++; renderQ(); } }, [qz.i === qz.round.length - 1 ? 'Результат' : 'Дальше']);
+    var btns = [];
+    var grid = h('div', { class: 'opts' });
+    opts.forEach(function (o) {
+      var b = h('button', { class: 'opt', type: 'button', text: textOf(o, qz.mode) });
+      b.addEventListener('click', function () {
+        if (qz.answered) return; qz.answered = true;
+        var ok = o.id === w.id;
+        btns.forEach(function (x) {
+          if (x.w.id === w.id) x.b.classList.add('good');
+          else if (x.b === b) x.b.classList.add('bad');
+          else x.b.classList.add('dim');
+        });
+        if (ok) {
+          qz.score++; qz.streak++; addStars(1);
+          fb.className = 'fb good'; fb.textContent = 'Правильно!' + (qz.streak >= 3 ? ' Подряд: ' + qz.streak : '');
+        } else {
+          qz.streak = 0; fb.className = 'fb bad'; fb.textContent = 'Правильный ответ: ' + textOf(w, qz.mode);
+        }
+        if (qz.mode === 'ruen') speak(w.say, 0.85);
+        next.hidden = false; next.focus();
+      });
+      btns.push({ b: b, w: o }); grid.appendChild(b);
+    });
+    box.appendChild(h('div', { style: 'display:flex;flex-direction:column;gap:16px' }, [meta, bar, prompt, grid, fb, h('div', { class: 'actions' }, [next])]));
+    if (qz.mode === 'listen') speak(w.say, 0.85);
+  }
+  function renderQuizEnd(box) {
+    var total = qz.round.length, ratio = total ? qz.score / total : 0;
+    var s = ratio >= 0.9 ? 3 : (ratio >= 0.6 ? 2 : 1);
+    var text = ratio >= 0.9 ? 'Отлично!' : (ratio >= 0.6 ? 'Хорошо!' : 'Попробуй ещё раз, получится лучше');
+    box.appendChild(h('div', { class: 'result' }, [
+      starRow(s, 3), h('h2', { text: text }),
+      h('p', { class: 'lead', text: 'Верных ответов: ' + qz.score + ' из ' + total }),
+      h('button', { class: 'btn blue', type: 'button', onclick: initQuiz }, ['Играть ещё'])
+    ]));
+  }
+
+  /* ---------- build the word ---------- */
+  var sc = { cand: [], cur: null, tiles: [], slots: [], hints: 0, solved: false, n: 0 };
+  function initBuild() {
+    sc.cand = pool().filter(function (w) { return w.target; });
+    sc.n = 0; sc.cur = null;
+    nextBuild();
+  }
+  function nextBuild() {
+    var box = $('buildBox');
+    if (!sc.cand.length) { box.textContent = ''; box.appendChild(h('p', { class: 'empty', text: 'В этом списке нет слов для сборки. Выбери другой список.' })); return; }
+    var w = sc.cand[Math.floor(Math.random() * sc.cand.length)], guard = 0;
+    while (sc.cand.length > 1 && sc.cur && w.id === sc.cur.id && guard++ < 20) w = sc.cand[Math.floor(Math.random() * sc.cand.length)];
+    sc.cur = w;
+    var ans = w.target.toLowerCase();
+    var tiles = ans.split('').map(function (ch, i) { return { id: i, ch: ch, used: false }; });
+    var order = shuffle(tiles), tries = 0;
+    while (order.map(function (t) { return t.ch; }).join('') === ans && tries++ < 10) order = shuffle(tiles);
+    sc.tiles = order; sc.byId = tiles;
+    sc.slots = ans.split('').map(function () { return null; });
+    sc.hints = 0; sc.solved = false;
+    renderBuild('', false);
+  }
+  function buildGuess() { return sc.slots.map(function (id) { return id === null ? '' : sc.byId[id].ch; }).join(''); }
+  function placeTile(t) {
+    if (sc.solved || t.used) return;
+    var i = sc.slots.indexOf(null); if (i < 0) return;
+    sc.slots[i] = t.id; t.used = true;
+    if (sc.slots.indexOf(null) < 0) {
+      var ans = sc.cur.target.toLowerCase();
+      if (buildGuess() === ans) {
+        sc.solved = true; sc.n++;
+        addStars(sc.hints ? 1 : 2);
+        speak(sc.cur.target, 0.85);
+        renderBuild('Верно! ' + (sc.cur.verb ? sc.cur.en : sc.cur.en + ' — ' + sc.cur.ru), false);
+      } else {
+        renderBuild('Почти! Нажми на букву в ответе, чтобы убрать её.', true);
+      }
+      return;
+    }
+    renderBuild('', false);
+  }
+  function freeSlot(i) {
+    if (sc.solved || sc.slots[i] === null) return;
+    sc.byId[sc.slots[i]].used = false; sc.slots[i] = null;
+    renderBuild('', false);
+  }
+  function hintBuild() {
+    if (sc.solved) return;
+    var ans = sc.cur.target.toLowerCase(), p = 0;
+    while (p < ans.length && sc.slots[p] !== null && sc.byId[sc.slots[p]].ch === ans[p]) p++;
+    for (var i = p; i < ans.length; i++) { if (sc.slots[i] !== null) { sc.byId[sc.slots[i]].used = false; sc.slots[i] = null; } }
+    if (p >= ans.length) return;
+    var t = sc.tiles.filter(function (x) { return !x.used && x.ch === ans[p]; })[0];
+    if (t) { sc.slots[p] = t.id; t.used = true; sc.hints++; }
+    if (sc.slots.indexOf(null) < 0) { sc.solved = true; sc.n++; addStars(1); speak(sc.cur.target, 0.85); renderBuild('Верно! ' + sc.cur.en, false); return; }
+    renderBuild('', false);
+  }
+  function resetBuild() {
+    if (sc.solved) return;
+    sc.slots = sc.slots.map(function () { return null; });
+    sc.tiles.forEach(function (t) { t.used = false; });
+    renderBuild('', false);
+  }
+  function renderBuild(msg, shake) {
+    var box = $('buildBox'); box.textContent = '';
+    var w = sc.cur;
+    var spk = h('button', { class: 'spk', type: 'button', 'aria-label': 'Послушать слово', onclick: function () { speak(w.target, 0.85); } }); spk.innerHTML = ICON_SPK;
+    var prompt = h('div', { class: 'q-box' }, [h('div', { class: 'q-big', text: w.prompt }), spk, h('div', { class: 'q-sub', text: w.sub })]);
+    var slots = h('div', { class: 'slots' + (shake ? ' shake' : ''), 'aria-label': 'Твой ответ' });
+    sc.slots.forEach(function (id, i) {
+      var filled = id !== null;
+      var s = h('button', { type: 'button', class: 'slot' + (filled ? ' filled' : '') + (sc.solved ? ' ok' : ''), 'aria-label': filled ? 'Буква ' + sc.byId[id].ch + '. Нажми, чтобы убрать.' : 'Пустая клетка', text: filled ? sc.byId[id].ch : '' });
+      s.addEventListener('click', function () { freeSlot(i); });
+      slots.appendChild(s);
+    });
+    var tiles = h('div', { class: 'tiles' });
+    sc.tiles.forEach(function (t) {
+      var b = h('button', { type: 'button', class: 'tile' + (t.used ? ' used' : ''), 'aria-label': 'Буква ' + t.ch, text: t.ch });
+      b.addEventListener('click', function () { placeTile(t); });
+      if (t.used) b.setAttribute('tabindex', '-1');
+      tiles.appendChild(b);
+    });
+    var fb = h('div', { class: 'fb ' + (sc.solved ? 'good' : (msg ? 'bad' : '')), role: 'status', text: msg });
+    var actions = sc.solved
+      ? [h('button', { class: 'btn blue', type: 'button', onclick: nextBuild }, ['Дальше'])]
+      : [h('button', { class: 'btn yellow', type: 'button', onclick: hintBuild }, ['Подсказка']),
+         h('button', { class: 'btn', type: 'button', onclick: resetBuild }, ['Сначала']),
+         h('button', { class: 'btn', type: 'button', onclick: nextBuild }, ['Другое слово'])];
+    var meta = h('div', { class: 'meta' }, [h('span', { text: 'Собрано слов: ' + sc.n })]);
+    box.appendChild(h('div', { style: 'display:flex;flex-direction:column;gap:16px' }, [meta, prompt, slots, tiles, fb, h('div', { class: 'actions' }, actions)]));
+  }
+
+  /* ---------- start ---------- */
+  renderUnits();
+  showTab('dict');
+})();
+</script>
+</body>
+</html>
